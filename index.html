@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Калькулятор футболок</title>
+<style>
+:root{--bg:#f8f1f3;--surface:#fff;--text:#171717;--muted:#5e5e5e;--line:#d6e6da;--line-strong:#8fb89a;--accent:#3d8b57;--accent-dark:#2f6f45;--accent-soft:#eaf5ed;--shadow:0 10px 30px rgba(57,96,69,.10)}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);padding:40px 16px}
+.wrap{max-width:1080px;margin:0 auto;background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.99));border:1px solid var(--line);border-radius:34px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+.wrap:before{content:'';position:absolute;left:0;top:0;width:340px;height:340px;background:radial-gradient(circle,rgba(61,139,87,.11),transparent 68%)}
+.head{padding:42px 38px 20px;text-align:center;position:relative;z-index:1}h1{margin:0;font-size:42px;line-height:1.05;font-weight:800;letter-spacing:-.03em}
+.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:22px;padding:12px 22px 22px;position:relative;z-index:1}
+.panel,.card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:22px;min-width:0}.panel{background:linear-gradient(180deg,#fcfffd,#f7fbf8)}
+.step+.step{margin-top:18px}.step.is-hidden{display:none}.step h3,.card h3{margin:0 0 12px;font-size:18px;font-weight:800}
+.seg,.dim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.btn{border:1.5px solid var(--line);background:#fff;border-radius:14px;min-height:54px;padding:10px 12px;cursor:pointer;transition:.18s ease;font-size:15px;font-weight:700;color:#333}
+.btn:hover{transform:translateY(-1px);border-color:var(--line-strong);background:#fbfefc}.btn.active{background:var(--accent-soft);color:var(--accent-dark);border-color:var(--accent)}
+.btn:disabled,.sw:disabled,.mini-btn:disabled{opacity:.42;cursor:not-allowed;transform:none;box-shadow:none;background:#fafafa}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,52px);gap:12px}
+.sw{width:52px;height:52px;border-radius:50%;border:2px solid #d7d7d7;cursor:pointer;background:var(--sw);transition:.18s ease}
+.sw.white{box-shadow:inset 0 0 0 1px #d8d8d8}.sw.transparent{background:linear-gradient(45deg,#efefef 25%,#fff 25%,#fff 50%,#efefef 50%,#efefef 75%,#fff 75%,#fff 100%);background-size:12px 12px}
+.sw.active{border-color:var(--accent);box-shadow:0 0 0 4px rgba(61,139,87,.14)}
+.place-list{display:grid;gap:12px}.place-card{border:1px solid #dfece2;border-radius:18px;padding:14px;background:#fff}.place-card.is-on{background:#f9fdf9;border-color:#cce2d3}
+.place-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}.place-name{font-size:16px;font-weight:800}
+.toggle{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer}.toggle.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.colors-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.color-buttons{display:grid;grid-template-columns:repeat(7,minmax(40px,1fr));gap:8px}.mini-btn{border:1.5px solid var(--line);background:#fff;border-radius:12px;min-height:42px;padding:6px 8px;cursor:pointer;font-size:13px;font-weight:800}
+.mini-btn.active{background:var(--accent-soft);color:var(--accent-dark);border-color:var(--accent)}
+.sum{display:grid;gap:14px;min-width:0}.badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px}.badge{border:1px solid #dfece2;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:700;color:#36523f;background:#fff}
+.row{display:flex;justify-content:space-between;gap:14px;padding-bottom:8px;border-bottom:1px dashed #e9efe9;font-size:15px;color:#444}.row:last-child{border-bottom:none;padding-bottom:0}.row strong{color:#191919}
+.formula{font-size:14px;color:var(--muted);line-height:1.55;margin-top:8px}.totalcard{background:linear-gradient(180deg,#f8fcf9,#eef7f1);border-color:#d8ebde}.total{font-size:40px;font-weight:900;color:var(--accent-dark);line-height:1;margin-top:6px}
+.note,.status{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
+@media (max-width:980px){.grid{grid-template-columns:1fr}h1{font-size:34px}}
+@media (max-width:560px){body{padding:10px 8px}.wrap{border-radius:22px}.head{padding:18px 14px 10px}h1{font-size:24px}.grid{padding:10px;gap:10px}.panel,.card{padding:14px;border-radius:18px}.seg,.dim-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.btn{min-height:46px;padding:8px;font-size:13px;border-radius:12px}.swatches{grid-template-columns:repeat(4,52px);gap:10px}.sw{width:48px;height:48px}.place-top{align-items:flex-start;flex-direction:column}.colors-row{grid-template-columns:1fr}.color-buttons{grid-template-columns:repeat(4,minmax(38px,1fr))}.badge{font-size:12px;padding:7px 10px}.row,.formula{font-size:12px}.total{font-size:28px}}
+</style>
+</head>
+<body>
+<section class="wrap">
+  <div class="head"><h1>Калькулятор расчёта стоимости печати на футболках</h1></div>
+  <div class="grid" id="app"></div>
+</section>
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAoHPyun4e1wfWITFzFze115QclBv851G0MRiEZX33MutKrpMFUeT2OgDm01qlPmOJBg/exec';
+
+const APP = {
+  genders:[{id:'male',label:'Мужское'},{id:'female',label:'Женское'}],
+  materials:[
+    {id:'cotton100',label:'100% хлопок',densities:[145,155,180,240,300]},
+    {id:'kulirka_lycra',label:'Кулирка с лайкрой 92/8',densities:[165,200,240]}
+  ],
+  colors:[
+    {id:'white',label:'Белый',hex:'#ffffff',className:'white'},
+    {id:'black',label:'Чёрный',hex:'#111111'},
+    {id:'gray',label:'Серый',hex:'#8f8f8f'},
+    {id:'beige',label:'Бежевый',hex:'#d8c3a5'},
+    {id:'red',label:'Красный',hex:'#d64242'},
+    {id:'blue',label:'Синий',hex:'#295bc8'},
+    {id:'sky',label:'Голубой',hex:'#87c8ff'},
+    {id:'green',label:'Зелёный',hex:'#36a05f'},
+    {id:'yellow',label:'Жёлтый',hex:'#f0d34a'},
+    {id:'pink',label:'Розовый',hex:'#ef9dc2'},
+    {id:'violet',label:'Фиолетовый',hex:'#8f61d4'},
+    {id:'orange',label:'Оранжевый',hex:'#f59b2f'},
+    {id:'burgundy',label:'Бордовый',hex:'#7a2438'},
+    {id:'request',label:'По запросу',hex:'transparent',className:'transparent'}
+  ],
+  quantities:[50,100,200,300,500,1000],
+  printColors:[0,1,2,3,4,5,6],
+  places:[
+    {id:'chest',label:'Грудь'},
+    {id:'back',label:'Спина'},
+    {id:'leftSleeve',label:'Левый рукав'},
+    {id:'rightSleeve',label:'Правый рукав'}
+  ],
+  models:[
+    {id:'standard',label:'Стандартная',basePrice:650},
+    {id:'oversize',label:'Оверсайз',basePrice:850}
+  ]
+};
+
+const money = v => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.round(v)) + ' руб.';
+const n0 = v => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(v);
+
+function buildFallbackTable() {
+  const printTotalsByQty = {
+    50:{1:3420,2:4680,3:6120,4:7540,5:9000,6:10440},
+    100:{1:4500,2:6840,3:9360,4:11880,5:14400,6:16920},
+    200:{1:7380,2:10620,3:14040,4:17460,5:20880,6:24300},
+    300:{1:9180,2:12780,3:16560,4:20340,5:24120,6:27900},
+    500:{1:12960,2:16560,3:21060,4:25560,5:30060,6:34560},
+    1000:{1:22400,2:30600,3:37800,4:45000,5:52200,6:59400}
+  };
+  const rows = [];
+  for (const model of APP.models) {
+    for (const material of APP.materials) {
+      for (const density of material.densities) {
+        for (const color of APP.colors) {
+          for (const qty of APP.quantities) {
+            const printSet = printTotalsByQty[qty];
+            rows.push({
+              model_id: model.id,
+              model_label: model.label,
+              material_id: material.id,
+              material_label: material.label,
+              density,
+              color_id: color.id,
+              color_label: color.label,
+              qty,
+              base_price: model.basePrice,
+              print_1: printSet[1],
+              print_2: printSet[2],
+              print_3: printSet[3],
+              print_4: printSet[4],
+              print_5: printSet[5],
+              print_6: printSet[6]
+            });
+          }
+        }
+      }
+    }
+  }
+  return rows;
+}
+
+let TABLE = buildFallbackTable();
+let DATA_SOURCE_LABEL = 'Локальные данные';
+
+function loadJsonp(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = '__shirtsCallback_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    const sep = url.includes('?') ? '&' : '?';
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error('Таймаут загрузки данных'));
+    }, 15000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      if (script.parentNode) script.parentNode.removeChild(script);
+      try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+    }
+
+    window[callbackName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('Ошибка загрузки скрипта'));
+    };
+
+    script.src = url + sep + 'callback=' + encodeURIComponent(callbackName);
+    document.body.appendChild(script);
+  });
+}
+
+async function initTable() {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'PASTE_YOUR_WEB_APP_URL_HERE') {
+    DATA_SOURCE_LABEL = 'Локальные данные';
+    return { ok:false, error:'Не вставлен URL Apps Script' };
+  }
+  try {
+    const data = await loadJsonp(APPS_SCRIPT_URL);
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || 'Пустой ответ Apps Script');
+    }
+    if (!Array.isArray(data.items) || !data.items.length) {
+      throw new Error('Apps Script вернул пустую таблицу');
+    }
+    TABLE = data.items.map(row => ({
+      ...row,
+      density: Number(row.density || 0),
+      qty: Number(row.qty || 0),
+      base_price: Number(row.base_price || 0),
+      print_1: Number(row.print_1 || 0),
+      print_2: Number(row.print_2 || 0),
+      print_3: Number(row.print_3 || 0),
+      print_4: Number(row.print_4 || 0),
+      print_5: Number(row.print_5 || 0),
+      print_6: Number(row.print_6 || 0)
+    }));
+    DATA_SOURCE_LABEL = 'Google Sheets (Apps Script)';
+    return { ok:true };
+  } catch (err) {
+    DATA_SOURCE_LABEL = 'Локальные данные';
+    return { ok:false, error:String(err && err.message ? err.message : err) };
+  }
+}
+
+class Calc {
+  constructor(root, initState){
+    this.root = root;
+    this.status = initState || { ok:false, error:'Неизвестное состояние' };
+    this.s = {
+      gender:'',
+      model:'',
+      material:'',
+      density:null,
+      color:'',
+      qty:null,
+      chestEnabled:false,
+      chestColors:0,
+      backEnabled:false,
+      backColors:0,
+      leftSleeveEnabled:false,
+      leftSleeveColors:0,
+      rightSleeveEnabled:false,
+      rightSleeveColors:0
+    };
+    this.render();
+  }
+
+  btn(label,active,a,v){
+    return `<button type="button" class="btn ${active?'active':''}" data-a="${a}" data-v="${v}">${label}</button>`;
+  }
+
+  colorSwatch(c){
+    const active = this.s.color === c.label;
+    const cls = c.className ? ` ${c.className}` : '';
+    return `<button type="button" class="sw${cls} ${active?'active':''}" title="${c.label}" aria-label="${c.label}" style="--sw:${c.hex}" data-a="color" data-v="${c.label}"></button>`;
+  }
+
+  placeCard(place){
+    const s = this.s;
+    const enabled = !!s[place.id+'Enabled'];
+    const colors = s[place.id+'Colors'];
+    return `<div class="place-card ${enabled?'is-on':''}">
+      <div class="place-top">
+        <div class="place-name">${place.label}</div>
+        <button type="button" class="toggle ${enabled?'on':''}" data-a="toggle" data-place="${place.id}" data-v="${enabled?'off':'on'}">
+          ${enabled?'Включено':'Не выбрано'}
+        </button>
+      </div>
+      <div class="colors-row">
+        <div>Количество цветов печати</div>
+        <div class="color-buttons">
+          ${APP.printColors.map(num=>`
+            <button type="button" class="mini-btn ${num===colors?'active':''}"
+              data-a="placeColors" data-place="${place.id}" data-v="${num}" ${enabled?'':'disabled'}>
+              ${num===0?'—':num}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  findRow(){
+    const s = this.s;
+    return TABLE.find(r =>
+      r.model_id === s.model &&
+      r.material_id === s.material &&
+      Number(r.density) === Number(s.density) &&
+      r.color_label === s.color &&
+      Number(r.qty) === Number(s.qty)
+    );
+  }
+
+  getPrintTotal(row, n){
+    if (!row || !n) return 0;
+    return Number(row['print_' + n] || 0);
+  }
+
+  render(){
+    const s = this.s;
+    const materialObj = APP.materials.find(x=>x.id===s.material);
+    const densities = materialObj ? materialObj.densities : [];
+    const modelObj = APP.models.find(x=>x.id===s.model);
+    const row = this.findRow();
+
+    const baseUnit = row ? Number(row.base_price) : (modelObj ? modelObj.basePrice : 0);
+    const baseTotal = baseUnit * (s.qty || 0);
+
+    const chest = s.chestEnabled ? this.getPrintTotal(row, s.chestColors) : 0;
+    const back = s.backEnabled ? this.getPrintTotal(row, s.backColors) : 0;
+    const leftSleeve = s.leftSleeveEnabled ? this.getPrintTotal(row, s.leftSleeveColors) : 0;
+    const rightSleeve = s.rightSleeveEnabled ? this.getPrintTotal(row, s.rightSleeveColors) : 0;
+
+    const total = baseTotal + chest + back + leftSleeve + rightSleeve;
+
+    this.root.innerHTML = `
+      <div class="panel">
+        <div class="step">
+          <h3>Выберите пол</h3>
+          <div class="seg">${APP.genders.map(i=>this.btn(i.label,s.gender===i.id,'gender',i.id)).join('')}</div>
+        </div>
+
+        <div class="step ${s.gender?'':'is-hidden'}">
+          <h3>Модель</h3>
+          <div class="seg">${APP.models.map(i=>this.btn(i.label,s.model===i.id,'model',i.id)).join('')}</div>
+        </div>
+
+        <div class="step ${(s.gender&&s.model)?'':'is-hidden'}">
+          <h3>Материал</h3>
+          <div class="seg">${APP.materials.map(i=>this.btn(i.label,s.material===i.id,'material',i.id)).join('')}</div>
+        </div>
+
+        <div class="step ${(s.gender&&s.model&&s.material)?'':'is-hidden'}">
+          <h3>Плотность</h3>
+          <div class="dim-grid">${densities.map(i=>this.btn(i+' г/м²',s.density===i,'density',i)).join('')}</div>
+        </div>
+
+        <div class="step ${(s.gender&&s.model&&s.material&&s.density)?'':'is-hidden'}">
+          <h3>Цвет изделия</h3>
+          <div class="swatches">${APP.colors.map(c=>this.colorSwatch(c)).join('')}</div>
+        </div>
+
+        <div class="step ${(s.gender&&s.model&&s.material&&s.density&&s.color)?'':'is-hidden'}">
+          <h3>Тираж</h3>
+          <div class="seg">${APP.quantities.map(i=>this.btn(i+' шт.',s.qty===i,'qty',i)).join('')}</div>
+        </div>
+
+        <div class="step ${(s.gender&&s.model&&s.material&&s.density&&s.color&&s.qty)?'':'is-hidden'}">
+          <h3>Места нанесения</h3>
+          <div class="place-list">${APP.places.map(p=>this.placeCard(p)).join('')}</div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <div class="card">
+          <div class="badges">
+            ${s.gender?`<div class="badge">${s.gender==='male'?'Мужское':'Женское'}</div>`:''}
+            ${modelObj?`<div class="badge">${modelObj.label}</div>`:''}
+            ${materialObj?`<div class="badge">${materialObj.label}</div>`:''}
+            ${s.density?`<div class="badge">${s.density} г/м²</div>`:''}
+            ${s.color?`<div class="badge">${s.color}</div>`:''}
+            ${s.qty?`<div class="badge">${n0(s.qty)} шт.</div>`:''}
+            ${s.chestEnabled&&s.chestColors?`<div class="badge">Грудь: ${s.chestColors} цв.</div>`:''}
+            ${s.backEnabled&&s.backColors?`<div class="badge">Спина: ${s.backColors} цв.</div>`:''}
+            ${s.leftSleeveEnabled&&s.leftSleeveColors?`<div class="badge">Левый рукав: ${s.leftSleeveColors} цв.</div>`:''}
+            ${s.rightSleeveEnabled&&s.rightSleeveColors?`<div class="badge">Правый рукав: ${s.rightSleeveColors} цв.</div>`:''}
+          </div>
+        </div>
+
+        <div class="card totalcard">
+          <h3>Итоговая стоимость</h3>
+          <div class="total">${money(total)}</div>
+        </div>
+      </div>
+    `;
+
+    this.root.querySelectorAll('[data-a]').forEach(el=>el.addEventListener('click',()=>{
+      const a = el.dataset.a;
+      let v = el.dataset.v;
+      if (['density','qty','placeColors'].includes(a)) v = Number(v);
+
+      if (a==='gender'){
+        s.gender = v; s.model=''; s.material=''; s.density=null; s.color=''; s.qty=null;
+      }
+      if (a==='model'){
+        s.model = v; s.material=''; s.density=null; s.color=''; s.qty=null;
+      }
+      if (a==='material'){
+        s.material = v; s.density=null; s.color=''; s.qty=null;
+      }
+      if (a==='density'){
+        s.density = v; s.color=''; s.qty=null;
+      }
+      if (a==='color'){
+        s.color = v; s.qty=null;
+      }
+      if (a==='qty') s.qty = v;
+
+      if (a==='toggle'){
+        const p = el.dataset.place;
+        const nextOn = v === 'on';
+        s[p+'Enabled'] = nextOn;
+        if (!nextOn) s[p+'Colors'] = 0;
+        if (nextOn && !s[p+'Colors']) s[p+'Colors'] = 1;
+      }
+
+      if (a==='placeColors'){
+        const p = el.dataset.place;
+        s[p+'Colors'] = v;
+        s[p+'Enabled'] = v > 0;
+      }
+
+      this.render();
+    }));
+  }
+}
+
+(async () => {
+  const initState = await initTable();
+  new Calc(document.getElementById('app'), initState);
+})();
+</script>
+</body>
+</html>
