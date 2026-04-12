@@ -335,19 +335,12 @@ class Calc {
           </div>
         </div>
 
-        '<div class="card totalcard">' +
-  '<h3>Итоговая стоимость</h3>' +
-  '<div class="total">' + money(total) + '</div>' +
-
-  '<div style="color:#a94442; font-size:12px; margin-top:6px; line-height:1.3;">' +
-    '*Предварительная стоимость. Для точного расчёта уточняйте у менеджера.' +
-  '</div>' +
-
-  ((this.status && this.status.ok === false && this.status.error)
-    ? '<div class="warn">' + this.status.error + '</div>'
-    : '') +
-'</div>' +
-'</div>';
+        <div class="card totalcard">
+          <h3>Итоговая стоимость</h3>
+          <div class="total">${money(total)}</div>
+        </div>
+      </div>
+    `;
 
     this.root.querySelectorAll('[data-a]').forEach(el=>el.addEventListener('click',()=>{
       const a = el.dataset.a;
