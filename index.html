@@ -29,10 +29,10 @@
 .mini-btn.active{background:var(--accent-soft);color:var(--accent-dark);border-color:var(--accent)}
 .sum{display:grid;gap:14px;min-width:0}.badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px}.badge{border:1px solid #dfece2;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:700;color:#36523f;background:#fff}
 .row{display:flex;justify-content:space-between;gap:14px;padding-bottom:8px;border-bottom:1px dashed #e9efe9;font-size:15px;color:#444}.row:last-child{border-bottom:none;padding-bottom:0}.row strong{color:#191919}
-.formula{font-size:14px;color:var(--muted);line-height:1.55;margin-top:8px}.totalcard{background:linear-gradient(180deg,#f8fcf9,#eef7f1);border-color:#d8ebde}.total{font-size:40px;font-weight:900;color:var(--accent-dark);line-height:1;margin-top:6px}
+.totalcard{background:linear-gradient(180deg,#f8fcf9,#eef7f1);border-color:#d8ebde}.total{font-size:40px;font-weight:900;color:var(--accent-dark);line-height:1;margin-top:6px}
 .note,.status{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
 @media (max-width:980px){.grid{grid-template-columns:1fr}h1{font-size:34px}}
-@media (max-width:560px){body{padding:10px 8px}.wrap{border-radius:22px}.head{padding:18px 14px 10px}h1{font-size:24px}.grid{padding:10px;gap:10px}.panel,.card{padding:14px;border-radius:18px}.seg,.dim-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.btn{min-height:46px;padding:8px;font-size:13px;border-radius:12px}.swatches{grid-template-columns:repeat(4,52px);gap:10px}.sw{width:48px;height:48px}.place-top{align-items:flex-start;flex-direction:column}.colors-row{grid-template-columns:1fr}.color-buttons{grid-template-columns:repeat(4,minmax(38px,1fr))}.badge{font-size:12px;padding:7px 10px}.row,.formula{font-size:12px}.total{font-size:28px}}
+@media (max-width:560px){body{padding:10px 8px}.wrap{border-radius:22px}.head{padding:18px 14px 10px}h1{font-size:24px}.grid{padding:10px;gap:10px}.panel,.card{padding:14px;border-radius:18px}.seg,.dim-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.btn{min-height:46px;padding:8px;font-size:13px;border-radius:12px}.swatches{grid-template-columns:repeat(4,52px);gap:10px}.sw{width:48px;height:48px}.place-top{align-items:flex-start;flex-direction:column}.colors-row{grid-template-columns:1fr}.color-buttons{grid-template-columns:repeat(4,minmax(38px,1fr))}.badge{font-size:12px;padding:7px 10px}.row{font-size:12px}.total{font-size:28px}}
 </style>
 </head>
 <body>
@@ -40,6 +40,7 @@
   <div class="head"><h1>Калькулятор расчёта стоимости печати на футболках</h1></div>
   <div class="grid" id="app"></div>
 </section>
+
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAoHPyun4e1wfWITFzFze115QclBv851G0MRiEZX33MutKrpMFUeT2OgDm01qlPmOJBg/exec';
 
@@ -74,8 +75,8 @@ const APP = {
     {id:'rightSleeve',label:'Правый рукав'}
   ],
   models:[
-    {id:'standard',label:'Стандартная',basePrice:650},
-    {id:'oversize',label:'Оверсайз',basePrice:850}
+    {id:'standard',label:'Стандартная'},
+    {id:'oversize',label:'Оверсайз'}
   ]
 };
 
@@ -91,6 +92,7 @@ function buildFallbackTable() {
     500:{1:12960,2:16560,3:21060,4:25560,5:30060,6:34560},
     1000:{1:22400,2:30600,3:37800,4:45000,5:52200,6:59400}
   };
+
   const rows = [];
   for (const model of APP.models) {
     for (const material of APP.materials) {
@@ -107,7 +109,6 @@ function buildFallbackTable() {
               color_id: color.id,
               color_label: color.label,
               qty,
-              base_price: model.basePrice,
               print_1: printSet[1],
               print_2: printSet[2],
               print_3: printSet[3],
@@ -162,6 +163,7 @@ async function initTable() {
     DATA_SOURCE_LABEL = 'Локальные данные';
     return { ok:false, error:'Не вставлен URL Apps Script' };
   }
+
   try {
     const data = await loadJsonp(APPS_SCRIPT_URL);
     if (!data || !data.ok) {
@@ -170,11 +172,11 @@ async function initTable() {
     if (!Array.isArray(data.items) || !data.items.length) {
       throw new Error('Apps Script вернул пустую таблицу');
     }
+
     TABLE = data.items.map(row => ({
       ...row,
       density: Number(row.density || 0),
       qty: Number(row.qty || 0),
-      base_price: Number(row.base_price || 0),
       print_1: Number(row.print_1 || 0),
       print_2: Number(row.print_2 || 0),
       print_3: Number(row.print_3 || 0),
@@ -182,6 +184,7 @@ async function initTable() {
       print_5: Number(row.print_5 || 0),
       print_6: Number(row.print_6 || 0)
     }));
+
     DATA_SOURCE_LABEL = 'Google Sheets (Apps Script)';
     return { ok:true };
   } catch (err) {
@@ -271,15 +274,12 @@ class Calc {
     const modelObj = APP.models.find(x=>x.id===s.model);
     const row = this.findRow();
 
-    const baseUnit = row ? Number(row.base_price) : (modelObj ? modelObj.basePrice : 0);
-    const baseTotal = baseUnit * (s.qty || 0);
-
     const chest = s.chestEnabled ? this.getPrintTotal(row, s.chestColors) : 0;
     const back = s.backEnabled ? this.getPrintTotal(row, s.backColors) : 0;
     const leftSleeve = s.leftSleeveEnabled ? this.getPrintTotal(row, s.leftSleeveColors) : 0;
     const rightSleeve = s.rightSleeveEnabled ? this.getPrintTotal(row, s.rightSleeveColors) : 0;
 
-    const total = baseTotal + chest + back + leftSleeve + rightSleeve;
+    const total = chest + back + leftSleeve + rightSleeve;
 
     this.root.innerHTML = `
       <div class="panel">
@@ -335,17 +335,23 @@ class Calc {
           </div>
         </div>
 
+        <div class="card">
+          <h3>Расчёт</h3>
+          <div class="row"><span>Грудь</span><strong>${money(chest)}</strong></div>
+          <div class="row"><span>Спина</span><strong>${money(back)}</strong></div>
+          <div class="row"><span>Левый рукав</span><strong>${money(leftSleeve)}</strong></div>
+          <div class="row"><span>Правый рукав</span><strong>${money(rightSleeve)}</strong></div>
+        </div>
+
         <div class="card totalcard">
-  <h3>Итоговая стоимость</h3>
-  <div class="total">${money(total)}</div>
-
-  <div style="color:#a94442; font-size:12px; margin-top:6px; line-height:1.3;">
-    *Предварительная стоимость. Для точного расчёта уточняйте у менеджера.
-  </div>
-
-</div>
-</div>
-`;
+          <h3>Итоговая стоимость</h3>
+          <div class="total">${money(total)}</div>
+          <div style="color:#a94442; font-size:12px; margin-top:6px; line-height:1.3;">
+            *Предварительная стоимость. Для точного расчёта уточняйте у менеджера.
+          </div>
+        </div>
+      </div>
+    `;
 
     this.root.querySelectorAll('[data-a]').forEach(el=>el.addEventListener('click',()=>{
       const a = el.dataset.a;
@@ -354,20 +360,46 @@ class Calc {
 
       if (a==='gender'){
         s.gender = v; s.model=''; s.material=''; s.density=null; s.color=''; s.qty=null;
+        s.chestEnabled=false; s.chestColors=0;
+        s.backEnabled=false; s.backColors=0;
+        s.leftSleeveEnabled=false; s.leftSleeveColors=0;
+        s.rightSleeveEnabled=false; s.rightSleeveColors=0;
       }
       if (a==='model'){
         s.model = v; s.material=''; s.density=null; s.color=''; s.qty=null;
+        s.chestEnabled=false; s.chestColors=0;
+        s.backEnabled=false; s.backColors=0;
+        s.leftSleeveEnabled=false; s.leftSleeveColors=0;
+        s.rightSleeveEnabled=false; s.rightSleeveColors=0;
       }
       if (a==='material'){
         s.material = v; s.density=null; s.color=''; s.qty=null;
+        s.chestEnabled=false; s.chestColors=0;
+        s.backEnabled=false; s.backColors=0;
+        s.leftSleeveEnabled=false; s.leftSleeveColors=0;
+        s.rightSleeveEnabled=false; s.rightSleeveColors=0;
       }
       if (a==='density'){
         s.density = v; s.color=''; s.qty=null;
+        s.chestEnabled=false; s.chestColors=0;
+        s.backEnabled=false; s.backColors=0;
+        s.leftSleeveEnabled=false; s.leftSleeveColors=0;
+        s.rightSleeveEnabled=false; s.rightSleeveColors=0;
       }
       if (a==='color'){
         s.color = v; s.qty=null;
+        s.chestEnabled=false; s.chestColors=0;
+        s.backEnabled=false; s.backColors=0;
+        s.leftSleeveEnabled=false; s.leftSleeveColors=0;
+        s.rightSleeveEnabled=false; s.rightSleeveColors=0;
       }
-      if (a==='qty') s.qty = v;
+      if (a==='qty'){
+        s.qty = v;
+        s.chestEnabled=false; s.chestColors=0;
+        s.backEnabled=false; s.backColors=0;
+        s.leftSleeveEnabled=false; s.leftSleeveColors=0;
+        s.rightSleeveEnabled=false; s.rightSleeveColors=0;
+      }
 
       if (a==='toggle'){
         const p = el.dataset.place;
